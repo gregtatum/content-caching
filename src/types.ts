@@ -1,3 +1,6 @@
+/**
+ * moz_places
+ */
 export interface MozPlacesRow {
   id: number;
   url: string;

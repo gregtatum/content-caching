@@ -1,6 +1,16 @@
 /**
  * @typedef {import("better-sqlite3").Database} Database
+ * @typedef {import("./types").MozPlacesRow} MozPlacesRow
  */
+
+/**
+ * The host is stored in reverse order for faster searching of subdomains.
+ * @param {string} host
+ * @returns {string}
+ */
+export function getRevesedHost(host) {
+  return host.split('').reverse().join('') + '.';
+}
 
 /**
  * @param {TemplateStringsArray} strings
@@ -75,4 +85,29 @@ export function getColumnsForTable(db, table) {
 
   // SQL Injection attack vector:
   return db.pragma(`table_info(${table})`);
+}
+
+/**
+ * @param {Database} db
+ * @param {string} host
+ * @param {number} limit
+ *
+ * @return {Pick<MozPlacesRow, "url" | "title" | "description">[]}
+ */
+export function getAllFromHost(db, host, limit) {
+  const rows = db
+    .prepare(
+      sql`
+        SELECT   url, title, description
+        FROM     moz_places
+        WHERE    rev_host = ?
+        ORDER BY last_visit_date DESC
+        LIMIT    ?
+      `,
+    )
+    .all(getRevesedHost(host), limit);
+  if (!rows) {
+    return [];
+  }
+  return rows;
 }
