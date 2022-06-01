@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "jsx": "react",
-    "module": "commonjs", // Resolution strategy.
+    "module": "nodenext", // Resolution strategy.
     "strict": true,
     "baseUrl": "./",
     "noEmit": true,
