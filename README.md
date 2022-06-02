@@ -1,6 +1,10 @@
-# Places DB Explorations
+# Content Caching
 
-This repo contains explorations into reading the places database, and scraping the content of webpages.
+This repo contains explorations into content caching for FF.
+
+## Node scripts
+
+There are some node scripts in `/scripts` which can read the places database, and extract lists from it.
 
 ```
 npm install
