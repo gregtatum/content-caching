@@ -5,7 +5,8 @@
   "author": "Greg Tatum",
   "type": "module",
   "scripts": {
-    "scraper": "node src/scraper.js"
+    "scraper": "node src/scraper.js",
+    "url-list": "node src/url-list.js"
   },
   "dependencies": {
     "better-sqlite3": "^7.5.3",
