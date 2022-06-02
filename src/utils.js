@@ -92,13 +92,13 @@ export function getColumnsForTable(db, table) {
  * @param {string} host
  * @param {number} limit
  *
- * @return {Pick<MozPlacesRow, "url" | "title" | "description">[]}
+ * @return {Pick<MozPlacesRow, "url" | "title" | "description" | "url_hash">[]}
  */
 export function getAllFromHost(db, host, limit) {
   const rows = db
     .prepare(
       sql`
-        SELECT   url, title, description
+        SELECT   url, title, description, url_hash
         FROM     moz_places
         WHERE    rev_host = ?
         ORDER BY last_visit_date DESC

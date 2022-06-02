@@ -5,10 +5,11 @@
   "author": "Greg Tatum",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js"
+    "scraper": "node src/scraper.js"
   },
   "dependencies": {
-    "better-sqlite3": "^7.5.3"
+    "better-sqlite3": "^7.5.3",
+    "cheerio": "^1.0.0-rc.11"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.5.0",
@@ -19,6 +20,7 @@
     "eslint-config-prettier": "^8.4.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-prettier": "^4.0.0",
+    "node-fetch": "^3.2.4",
     "prettier": "^2.5.1",
     "typescript": "^4.5.5"
   }
