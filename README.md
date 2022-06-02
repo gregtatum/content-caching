@@ -8,7 +8,7 @@ npm run scraper
 npm run url-list
 ```
 
-Apply the marionette script to mozilla-central to scrape, and adjust the paths: Marionette-scraping-script.patch
+Apply the [marionette script](https://github.com/gregtatum/gecko/blob/content-caching/browser/components/migration/tests/marionette/test_build_content_cache.py) to mozilla-central to scrape, and adjust the paths: Marionette-scraping-script.patch
 
 Run it with:
 
