@@ -8,17 +8,10 @@
     "allowJs": true, // Just add "// @ts-check"
     "checkJs": true,
     "lib": ["esnext", "dom"],
-    // paths lets you declare how TypeScript should resolve an import in
-    // your require/imports.
-    "paths": {
-      "src/*": [
-        "./src/*"
-      ],
-    }
   },
   // Specifies an array of filenames or patterns to include in the program. These
   // filenames are resolved relative to the directory containing the tsconfig.json file.
-  "include": ["src/**/*"],
+  "include": ["scripts/**/*"],
   // Specifies an array of filenames or patterns that should be skipped when
   // resolving include.
   "exclude": [],
