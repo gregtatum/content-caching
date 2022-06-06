@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "scraper": "node scripts/scraper.js",
-    "url-list": "node scripts/url-list.js"
+    "url-list": "node scripts/url-list.js",
+    "full-text-search": "node scripts/full-text-search.js"
   },
   "dependencies": {
     "better-sqlite3": "^7.5.3",

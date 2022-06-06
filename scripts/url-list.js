@@ -26,7 +26,7 @@ import {
       throw new Error('A host value has illegal characters: ' + host);
     }
 
-    const db = new Database('places.sqlite');
+    const db = new Database('data/places.sqlite');
     const rows = getAllFromHost(db, host, 500);
     const targetPath = `data/list/${host}.json`;
     console.log('Writing out', targetPath);

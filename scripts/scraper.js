@@ -68,7 +68,7 @@ function extractText(html) {
 }
 
 {
-  const db = new Database('places.sqlite');
+  const db = new Database('data/places.sqlite');
 
   // eslint-disable-next-line no-constant-condition
   if (false) {

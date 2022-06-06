@@ -1,7 +1,2 @@
-*.sqlite
 data
-
-
-# Added by cargo
-
 /target

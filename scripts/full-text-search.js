@@ -30,14 +30,14 @@ const RESET = '\u001b[0m';
  */
 
 {
-  const placesDB = new Database('places.sqlite');
-  const ftsDB = new Database('fts.sqlite');
+  const placesDB = new Database('data/places.sqlite');
+  const ftsDB = new Database('data/fts.sqlite');
 
   createFullTextDatabase(ftsDB);
-  console.log('fts.sqlite starts out as', getFileSize('fts.sqlite'));
+  console.log('fts.sqlite starts out as', getFileSize('data/fts.sqlite'));
 
   insertLocalCorpus(ftsDB);
-  console.log('fts.sqlite grew to', getFileSize('fts.sqlite'));
+  console.log('fts.sqlite grew to', getFileSize('data/fts.sqlite'));
 
   while (true) {
     const { text } = await inquirer.prompt([
@@ -60,9 +60,9 @@ function createFullTextDatabase(db) {
   console.log('Creating the local_corpus full text search table.');
   db.prepare(
     sql`
-          CREATE VIRTUAL TABLE local_corpus
-          USING FTS5(title, description, content, url)
-        `,
+      CREATE VIRTUAL TABLE local_corpus
+      USING FTS5(title, description, content, url, tokenize="trigram")
+    `,
   ).run();
 }
 
