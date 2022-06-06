@@ -13,41 +13,63 @@ import {
   getTableNames,
   sql,
 } from './utils.js';
+import inquirer from 'inquirer';
 
-try {
-  const placesDB = new Database('places.sqlite');
-  const ftsDB = new Database('fts.sqlite');
-
-  if (getTableNames(ftsDB).includes('local_corpus')) {
-    console.log('The virtual table already existed. Dropping it.');
-    await ftsDB.prepare(`DROP TABLE local_corpus`).run();
-  }
-
-  console.log('Creating the local_corpus full text search table.');
-  ftsDB
-    .prepare(
-      sql`
-          CREATE VIRTUAL TABLE local_corpus
-          USING FTS5(title, description, content, url)
-        `,
-    )
-    .run();
-  console.log('fts.sqlite starts out as', getFileSize('fts.sqlite'));
-
-  getLocalCorpus(ftsDB);
-  console.log('fts.sqlite grew to', getFileSize('fts.sqlite'));
-} catch (error) {
-  console.error(error);
-}
+const BLACK = '\u001b[30m';
+const RED = '\u001b[31m';
+const GREEN = '\u001b[32m';
+const YELLOW = '\u001b[33m';
+const BLUE = '\u001b[34m';
+const MAGENTA = '\u001b[35m';
+const CYAN = '\u001b[36m';
+const WHITE = '\u001b[37m';
+const RESET = '\u001b[0m';
 
 /**
  * @typedef {ReturnType<typeof getAllFromHost>} Listings
  */
 
+{
+  const placesDB = new Database('places.sqlite');
+  const ftsDB = new Database('fts.sqlite');
+
+  createFullTextDatabase(ftsDB);
+  console.log('fts.sqlite starts out as', getFileSize('fts.sqlite'));
+
+  insertLocalCorpus(ftsDB);
+  console.log('fts.sqlite grew to', getFileSize('fts.sqlite'));
+
+  while (true) {
+    const { text } = await inquirer.prompt([
+      { type: 'input', name: 'text', message: 'Search' },
+    ]);
+    console.log('\n\n\n\n');
+    search(ftsDB, text);
+  }
+}
+
 /**
  * @param {import("better-sqlite3").Database} db
  */
-function getLocalCorpus(db) {
+function createFullTextDatabase(db) {
+  if (getTableNames(db).includes('local_corpus')) {
+    console.log('The virtual table already existed. Dropping it.');
+    db.prepare(`DROP TABLE local_corpus`).run();
+  }
+
+  console.log('Creating the local_corpus full text search table.');
+  db.prepare(
+    sql`
+          CREATE VIRTUAL TABLE local_corpus
+          USING FTS5(title, description, content, url)
+        `,
+  ).run();
+}
+
+/**
+ * @param {import("better-sqlite3").Database} db
+ */
+function insertLocalCorpus(db) {
   const insert = db.prepare(
     sql`
       INSERT INTO local_corpus(title, description, content, url)
@@ -69,7 +91,7 @@ function getLocalCorpus(db) {
         if (!fs.existsSync(contentPath)) {
           continue;
         }
-        const content = fs.readFileSync(contentPath);
+        const content = fs.readFileSync(contentPath, { encoding: 'utf8' });
         insert.run({ title, description, content, url });
       }
     },
@@ -84,5 +106,70 @@ function getLocalCorpus(db) {
     /** @type {Listings} */
     const rows = getJSON(`data/list/${host}.json`);
     insertRows(host, rows);
+  }
+}
+
+/**
+ * @param {import("better-sqlite3").Database} db
+ * @param {string} text
+ */
+function search(db, text) {
+  /**
+   * @typedef {Object} Row
+   * @prop {string} title
+   * @prop {string} description
+   * @prop {string} content
+   * @prop {string} url
+   * @prop {string} rank
+   * @prop {string} snippet
+   */
+
+  /** @type {Row[]} */
+  const rows = db
+    .prepare(
+      sql`
+        SELECT
+          title,
+          description,
+          content,
+          url,
+          rank,
+          snippet(
+            local_corpus,
+            2,    -- Zero-indexed column
+            '${RED}',  -- Insert before text match
+            '${RESET}',  -- Insert after text match
+            '',   -- The text to add to the start or end of the selected text to indicate
+                  -- that the returned text does not occur at the start or end of its
+                  -- column, respectively.
+            20    -- 0-64 The maximum number of tokens in the returned text.
+          ) as snippet
+        FROM local_corpus
+        WHERE content MATCH @text
+        ORDER BY rank
+        LIMIT 5
+      `,
+    )
+    .all({ text });
+
+  for (const { title, url, snippet, rank } of rows) {
+    console.log(
+      '\n\n┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────',
+    );
+    console.log(`${WHITE}│ ${title}${RESET}`);
+    console.log(`${CYAN}│ ${url}${RESET}`);
+    console.log(`│ ${YELLOW}Score: ${RESET}${rank}`);
+    console.log(
+      `├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────`,
+    );
+    console.log(
+      snippet
+        .split('\n')
+        .map((s) => '│   ' + s)
+        .join('\n'),
+    );
+    console.log(
+      `└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────\n`,
+    );
   }
 }
