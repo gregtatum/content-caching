@@ -2,7 +2,8 @@
 
 #[macro_use]
 extern crate tantivy;
-use std::time::Instant;
+use std::thread;
+use std::time::{Duration, Instant};
 
 use content_caching::get_history;
 use fs_extra::dir::get_size;
@@ -82,6 +83,10 @@ fn main() -> tantivy::Result<()> {
         get_size(index_path).expect("Unable to get dir size.") / 1024 / 1024
     );
 
+    // FIXME: Guard against:
+    // Error: OpenReadError(FileDoesNotExist("meta.json"))
+    thread::sleep(Duration::from_millis(500));
+
     println!("Preparing the reader.");
     let reader = index
         .reader_builder()
@@ -90,7 +95,7 @@ fn main() -> tantivy::Result<()> {
 
     // Ask the user to search for it.
     loop {
-        println!("\n");
+        println!("\n\n\n\n");
         let search_string: String = Input::with_theme(&ColorfulTheme::default())
             .with_prompt("Search")
             .interact_text()
@@ -121,7 +126,7 @@ fn main() -> tantivy::Result<()> {
                 doc.get_first(url).unwrap().as_text().unwrap(),
                 RESET
             );
-            println!("│ {}Score {}{}:", YELLOW, RESET, score);
+            println!("│ {}Score: {}{}", YELLOW, RESET, score);
             println!("├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────");
             println!("{}", highlight(snippet));
             println!("└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────\n");
