@@ -1,2 +1,7 @@
 places.sqlite
 data
+
+
+# Added by cargo
+
+/target

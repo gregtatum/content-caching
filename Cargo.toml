@@ -1,0 +1,21 @@
+[package]
+name = "content-caching"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tantivy = "0.18"
+tempfile = "3.3"
+serde = "1.0"
+serde_json = "1.0"
+dialoguer = "0.10"
+textwrap = "0.15"
+fs_extra = "1.2"
+
+[[bin]]
+name = "tantivy-hello-world"
+
+[[bin]]
+name = "use-local-corpus"
