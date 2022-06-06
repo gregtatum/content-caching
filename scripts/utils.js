@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+
 /**
  * @typedef {import("better-sqlite3").Database} Database
  * @typedef {import("./types").MozPlacesRow} MozPlacesRow
@@ -110,4 +112,35 @@ export function getAllFromHost(db, host, limit) {
     return [];
   }
   return rows;
+}
+
+/**
+ * @param {number} n
+ * @returns {number}
+ */
+function prettyNumber(n) {
+  return Math.round(n * 100) / 100;
+}
+
+/**
+ * @param {string} path
+ * @returns {string}
+ */
+export function getFileSize(path) {
+  const bytes = fs.statSync(path).size;
+  if (bytes < 1024) {
+    return `${bytes} bytes`;
+  }
+  if (bytes < 1024 * 1024) {
+    return `${prettyNumber(bytes / 1024)}kb`;
+  }
+  return `${prettyNumber(bytes / 1024 / 1024)}mb`;
+}
+
+/**
+ * @param {string} path
+ * @returns {any}
+ */
+export function getJSON(path) {
+  return JSON.parse(fs.readFileSync(path, { encoding: 'utf8' }));
 }
