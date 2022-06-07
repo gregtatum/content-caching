@@ -43,7 +43,7 @@ const RESET = '\u001b[0m';
     const { text } = await inquirer.prompt([
       { type: 'input', name: 'text', message: 'Search' },
     ]);
-    console.log('\n\n\n\n');
+    console.log('\n');
     search(ftsDB, text);
   }
 }
@@ -61,7 +61,7 @@ function createFullTextDatabase(db) {
   db.prepare(
     sql`
       CREATE VIRTUAL TABLE local_corpus
-      USING FTS5(title, description, content, url, tokenize="trigram")
+      USING FTS5(title, description, content, url, tokenize="unicode61")
     `,
   ).run();
 }
@@ -124,6 +124,7 @@ function search(db, text) {
    * @prop {string} snippet
    */
 
+  let now = performance.now();
   /** @type {Row[]} */
   const rows = db
     .prepare(
@@ -152,12 +153,15 @@ function search(db, text) {
     )
     .all({ text });
 
+  const queryTime = performance.now() - now;
+  now = performance.now();
+
   for (const { title, url, snippet, rank } of rows) {
     console.log(
       '\n\n┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────',
     );
     console.log(`${WHITE}│ ${title}${RESET}`);
-    console.log(`${CYAN}│ ${url}${RESET}`);
+    console.log(`│ ${CYAN}${url}${RESET}`);
     console.log(`│ ${YELLOW}Score: ${RESET}${rank}`);
     console.log(
       `├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────`,
@@ -172,4 +176,7 @@ function search(db, text) {
       `└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────\n`,
     );
   }
+  console.log('You searched for ', text);
+  console.log(`Query took ${queryTime}ms`);
+  console.log(`Formatting took ${performance.now() - now}ms`);
 }

@@ -85,7 +85,7 @@ fn main() -> tantivy::Result<()> {
 
     // FIXME: Guard against:
     // Error: OpenReadError(FileDoesNotExist("meta.json"))
-    thread::sleep(Duration::from_millis(500));
+    thread::sleep(Duration::from_millis(0));
 
     println!("Preparing the reader.");
     let reader = index
@@ -106,9 +106,14 @@ fn main() -> tantivy::Result<()> {
 
         let query = query_parser.parse_query(&search_string)?;
 
+        let now = Instant::now();
+
         let top_docs = searcher.search(&query, &TopDocs::with_limit(5))?;
 
         let snippet_generator = SnippetGenerator::create(&searcher, &*query, content)?;
+
+        let query_time = now.elapsed().as_micros() as f64 / 1000.0;
+        let now = Instant::now();
 
         for (score, doc_address) in top_docs {
             let doc = searcher.doc(doc_address)?;
@@ -133,6 +138,11 @@ fn main() -> tantivy::Result<()> {
         }
 
         println!("You searched for {:?}", search_string);
+        println!("Query took {}ms", query_time);
+        println!(
+            "Formatting took {}ms",
+            now.elapsed().as_micros() as f64 / 1000.0
+        );
     }
 }
 
