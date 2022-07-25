@@ -6,9 +6,7 @@ import Database from 'better-sqlite3';
 import * as fs from 'fs';
 import {
   getAllFromHost,
-  getColumnsForTable,
   getFileSize,
-  getIndexes,
   getJSON,
   getTableNames,
   sql,
@@ -29,8 +27,10 @@ const RESET = '\u001b[0m';
  * @typedef {ReturnType<typeof getAllFromHost>} Listings
  */
 
+/**
+ * Creates a full text search CLI from the `data/hosts.json` file.
+ */
 {
-  const placesDB = new Database('data/places.sqlite');
   const ftsDB = new Database('data/fts.sqlite');
 
   createFullTextDatabase(ftsDB);
@@ -61,7 +61,7 @@ function createFullTextDatabase(db) {
   db.prepare(
     sql`
       CREATE VIRTUAL TABLE local_corpus
-      USING FTS5(title, description, content, url, tokenize="unicode61")
+      USING FTS5(title, description, content, url, tokenize="trigram")
     `,
   ).run();
 }
@@ -77,6 +77,8 @@ function insertLocalCorpus(db) {
     `,
   );
 
+  let limit = 0;
+
   const insertRows = db.transaction(
     /**
      * @param {string} host
@@ -85,6 +87,9 @@ function insertLocalCorpus(db) {
     (host, rows) => {
       console.log('Inserting rows for', host);
       for (const row of rows) {
+        if (limit++ >= 100) {
+          break;
+        }
         const hash = row.url_hash.toString(16);
         const { title, url, description } = row;
         const contentPath = `data/text/${hash}-${host}.txt`;

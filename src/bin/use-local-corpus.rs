@@ -57,13 +57,15 @@ fn main() -> tantivy::Result<()> {
         for entry in &history.entries {
             if let Some(string) = entry.read_content(&history.host) {
                 document_count += 1;
-                // rust-fmt: off
-                index_writer.add_document(doc!(
-                    url => entry.url.clone(),
-                    title => entry.title.clone().unwrap_or_default().to_string(),
-                    description => entry.description.clone().unwrap_or_default(),
-                    content => string
-                ))?;
+                if document_count < 10000 {
+                    // rust-fmt: off
+                    index_writer.add_document(doc!(
+                        url => entry.url.clone(),
+                        title => entry.title.clone().unwrap_or_default().to_string(),
+                        description => entry.description.clone().unwrap_or_default(),
+                        content => string
+                    ))?;
+                }
             }
         }
         println!("");

@@ -15,6 +15,9 @@ import {
   sql,
 } from './utils.js';
 
+/**
+ * Creates a list of URLs for a host from a places.sqlite file.
+ */
 {
   /** @type {string[]} */
   const hosts = JSON.parse(

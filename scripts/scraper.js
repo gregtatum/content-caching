@@ -16,6 +16,38 @@ import {
 } from './utils.js';
 
 /**
+ * A node.js based scraper.
+ *
+ * Warning! This doesn't work well as most site detect scrapers and have
+ * anti-bot protections.
+ */
+{
+  const db = new Database('data/places.sqlite');
+
+  // eslint-disable-next-line no-constant-condition
+  if (false) {
+    console.log('Tables:', getTableNames(db));
+    console.log('Indexes:', getIndexes(db));
+    console.log(getColumnsForTable(db, 'moz_places'));
+  }
+
+  const rows = getAllFromHost(db, 'www.amazon.com', 100);
+  console.log('Scraping:', rows[0].url);
+  console.log('------------------------------------------------------');
+
+  for (const { url, url_hash } of rows) {
+    const hash = url_hash.toString(16);
+    const html = await scrapeURLIfNeeded(url, hash);
+    if (html === null) {
+      console.log('Cached:', hash, url);
+    } else {
+      console.log('Scraped:', hash, url);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  }
+}
+
+/**
  * Scrapes the URL if no cache exists.
  *
  * @param {string} url
@@ -65,30 +97,4 @@ function extractText(html) {
     .map((s) => s.trim())
     .filter((s) => s)
     .join('\n');
-}
-
-{
-  const db = new Database('data/places.sqlite');
-
-  // eslint-disable-next-line no-constant-condition
-  if (false) {
-    console.log('Tables:', getTableNames(db));
-    console.log('Indexes:', getIndexes(db));
-    console.log(getColumnsForTable(db, 'moz_places'));
-  }
-
-  const rows = getAllFromHost(db, 'www.amazon.com', 100);
-  console.log('Scraping:', rows[0].url);
-  console.log('------------------------------------------------------');
-
-  for (const { url, url_hash } of rows) {
-    const hash = url_hash.toString(16);
-    const html = await scrapeURLIfNeeded(url, hash);
-    if (html === null) {
-      console.log('Cached:', hash, url);
-    } else {
-      console.log('Scraped:', hash, url);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-  }
 }
